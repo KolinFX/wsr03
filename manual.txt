@@ -1,0 +1,324 @@
+sudo apt-get update && sudo apt-get install -y xrdp
+
+sudo systemctl enable --now xrdp xrdp-sesman
+
+sudo gpasswd -a altlinux tsusers
+
+sudo gpasswd -a altlinux fuse
+
+ss -tulpn | grep 3389
+
+
+wget https://hashicorp-releases.yandexcloud.net/terraform/1.13.1/terraform_1.13.1_linux_amd64.zip
+
+sudo unzip terraform_1.13.1_linux_amd64.zip -d /usr/local/bin
+
+terraform --version
+
+rm -f terraform_1.13.1_linux_amd64.zip
+
+sudo apt-get install -y python3-module-openstackclient python3-module-pip
+
+pip3 install python-octaviaclient
+pip3 install python-cinderclient
+pip3 install python-novaclient
+
+mkdir Projects
+cd Projects
+mkdir Project_0{1,2}
+
+vim cloudinit.conf
+
+		# Terraform
+		export TF_VAR_OS_AUTH_URL=https://edu.cyber-infrastructure.ru:5000/v3
+		export TF_VAR_OS_PROJECT_NAME=Module_G_20
+		export TF_VAR_OS_USERNAME=Module_G_20
+		export TF_VAR_OS_PASSWORD=a1_A)0&1CB&|Y'KFS!q>U]i
+
+		# openstacl-cli
+		export OS_AUTH_URL=https://edu.cyber-infrastructure.ru:5000/v3
+		export OS_IDENTITY_API_VERSION=3
+		export OS_AUTH_TYPE=password
+		export OS_PROJECT_DOMAIN_NAME=Competence_SiSA
+		export OS_USER_DOMAIN_NAME=Competence_SiSA
+		export OS_PROJECT_NAME=Module_G_20
+		export OS_USERNAME=Module_G_20
+		export OS_PASSWORD=a1_A)0&1CB&|Y'KFS!q>U]i
+
+
+source cloudinit.conf
+
+openstack --insecure server list
+
+openstack --insecure network list
+
+
+
+
+vim ~./terraformrc
+
+provider_installation {
+    network_mirror {
+        url = "https://terraform-mirror.mcs.mail.ru"
+        include = ["registry.terraform.io/*/*"]
+}
+    direct {
+        exclude = ["registry.terraform.io/*/*"]
+    }
+}
+
+cd terraform/
+
+
+## Далее нужно проинициализировать проект, если все будет нормально - значит с файлом provider.tf проблем нет! 
+terraform init
+
+## Далее нужно поправить network id в файле variables.tf в секцию variable "network_id" - через графически интерфейс смотрим нетворк ИД сети cloud-net
+
+openstack --insecure network list
+
+## Далее нужно поправить subnet id в файле variables.tf в секцию variable "subnet_id"- через графически интерфейс смотрим subnet ИД сети cloud-net
+
+openstack --insecure subnet list
+
+
+terraform validate
+
+terraform plan
+
+## Далее нужно поправить flavor id в файле variables.tf в секцию variable "flavor_id"
+
+openstack --insecure flavor list | grep start
+
+terraform validate
+
+## Далее нужно поправить image id в файле variables.tf в секцию variable "image_id" - через графически интерфейс смотрим образы ИД сети cloud-net
+
+openstack --insecure image list | grep alt-p11-cloud
+
+## Если нет там такого образа - то идем на https://ftp.altlinux.org/pub/distributions/ALTLinux/p11/images/cloud/x86_64/ и скачиваем alt-p11-cloud и загрузить в образы
+
+
+terraform validate
+
+
+## Далее правил файл cloud-init.yml и правим там значения ssh ключа именно от CloudADM который дальше создаем
+## Для этого на CloudADM создаем ключ 
+
+ssh-keygen -t rsa
+
+cat ~/.ssh/id_rsa.pub
+
+## содержимое ключа cat ~/.ssh/id_rsa.pub копируем и вставляем в секцию ssh в cloud-init.yml
+
+vim cloud-init.yml
+
+
+terraform validate
+
+terraform plan
+
+rm *~
+y
+y
+y
+
+
+terraform plan
+
+terraform apply
+
+terraform destroy
+
+
+## Далее нужно дать права на исполнение файлам *.sh
+
+chmod +x *.sh
+
+
+## Далее из папки Project_01 пробуем деплоить наш проект для проверки
+
+./deploy_project_01.sh
+
+
+## Далее из папки Project_01 пробуем деплоить наш проект для проверки
+
+./destroy_project_01.sh
+
+
+
+## Далее в идеале скопировать в Проект-02 файл cloud-init.yml
+
+cd ./Projects/Project_02/terraform
+
+source ~/Projects/cloudinit.conf
+
+terraform init
+
+terraform validate
+
+## Далее правим для Проекта-02 все переменные в файлике variables.tf
+
+
+terraform validate
+
+ls
+
+rm *~
+
+
+## Далее нужно дать права на исполнение файлам *.sh
+
+chmod +x *.sh
+
+
+## Далее из папки Project_02 пробуем деплоить наш проект для проверки
+
+./deploy_project_02.sh
+
+
+## Далее из папки Project_02 пробуем деплоить наш проект для проверки
+
+./destroy_project_02.sh
+
+
+
+
+## День второй 
+
+## Настраиваем Project_01
+
+cd Projects/Project_01/
+
+
+## Приводим файл Хостс к виду ниже
+
+vim /etc/hosts
+
+127.0.0.1	localhost.localdomain	localhost
+:: 1	localhost6.localdomain	localhost6
+10.10.10.101	game01.dev.au.team	game01
+10.10.10.102	game02.dev.au.team	game02
+10.10.10.103	game03.dev.au.team	game03
+10.10.10.100	haproxy01.dev.au.team	haproxy01
+10.10.10.100	game.au.team	game
+
+
+
+## Приводим файл ~/.ssh/config к виду ниже
+
+vim ~/.ssh/config
+
+Host game0l
+	Hostname 10.10.10.101
+
+Host game02
+	Hostname 10.10.10.102
+
+Host game03
+	Hostname 10.10.10.103
+
+Host haproxy01
+	Hostname 10.10.10.100
+
+
+
+## Далее устанавливаем ansible
+
+pip3 install ansible
+
+## Добавляем переменное окружение для Ансибла
+
+export PATH=/home/altlinux/.local/bin:$PATH
+
+ansible --version
+
+
+cd ansible
+
+export ANSIBLE_HOME=$(pwd)
+echo $ANSIBLE_HOME
+
+
+
+
+
+ansible -i inventory.yml -m ping all
+
+
+## Поставим коллекцию
+
+ansible-galaxy collection install community.docker --force
+
+
+## Пытаемся запустить 
+
+ansible-playbook -i inventory.yml playbook_docker.yml
+
+
+cd files
+
+sudo cp ca.crt /etc/pki/ca-trust/source/anchors/
+sudo update-ca-trust
+
+cat game.key gamecrt > game.pem
+
+cd .
+
+ansible-playbook -i inventory.yml playbook_haproxy.yml
+
+
+## Настраиваем Project_02
+
+cd Projects/Project_02/
+
+
+## Приводим файл Хостс к виду ниже
+
+vim /etc/hosts
+
+127.0.0.1	localhost.localdomain	localhost
+:: 1	localhost6.localdomain	localhost6
+10.10.10.101	game01.dev.au.team	game01
+10.10.10.102	game02.dev.au.team	game02
+10.10.10.103	game03.dev.au.team	game03
+10.10.10.100	haproxy01.dev.au.team	haproxy01
+10.10.10.100	game.au.team	game
+
+10.10.10.21	acm-server.au.team	acm-server
+10.10.10.22	db-server.au.team	db-server
+10.10.10.23	bar-agent01.au.team	bar-agent01
+10.10.10.21	cb.au.team
+
+
+## Приводим файл ~/.ssh/config к виду ниже
+
+vim ~/.ssh/config
+
+Host game0l
+	Hostname 10.10.10.101
+
+Host game02
+	Hostname 10.10.10.102
+
+Host game03
+	Hostname 10.10.10.103
+
+Host haproxy01
+	Hostname 10.10.10.100
+
+Host acm-server
+	Hostname 10.10.10.21
+
+Host db-server
+	Hostname 10.10.10.22
+
+Host bar-agent01
+	Hostname 10.10.10.23
+
+
+cd ansible
+
+## Нужно скопировать файл CyberBackup_17_64-bit.x86_64 в папку files/CyberBackup_17_64-bit.x86_64 из https://disk.yandex.ru/d/JJgJyAqgn6IXpw
+
+## Далее делаем configure_project_02.sh и после чего можно сделать destroy_project_02.sh
