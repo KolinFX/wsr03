@@ -61,7 +61,7 @@ provider_installation {
     network_mirror {
         url = "https://terraform-mirror.mcs.mail.ru"
         include = ["registry.terraform.io/*/*"]
-}
+    }
     direct {
         exclude = ["registry.terraform.io/*/*"]
     }
@@ -322,3 +322,4 @@ cd ansible
 ## Нужно скопировать файл CyberBackup_17_64-bit.x86_64 в папку files/CyberBackup_17_64-bit.x86_64 из https://disk.yandex.ru/d/JJgJyAqgn6IXpw
 
 ## Далее делаем configure_project_02.sh и после чего можно сделать destroy_project_02.sh
+
