@@ -1,3 +1,5 @@
+https://sysahelper.ru/mod/page/view.php?id=582
+
 sudo apt-get update && sudo apt-get install -y xrdp
 
 sudo systemctl enable --now xrdp xrdp-sesman
@@ -322,4 +324,5 @@ cd ansible
 ## Нужно скопировать файл CyberBackup_17_64-bit.x86_64 в папку files/CyberBackup_17_64-bit.x86_64 из https://disk.yandex.ru/d/JJgJyAqgn6IXpw
 
 ## Далее делаем configure_project_02.sh и после чего можно сделать destroy_project_02.sh
+
 
