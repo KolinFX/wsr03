@@ -325,4 +325,47 @@ cd ansible
 
 ## Далее делаем configure_project_02.sh и после чего можно сделать destroy_project_02.sh
 
+-----------------------------------------------------------------------------
+
+cd files
+
+openssl req -x509 -sha256 -days 3653 -newkey rsa:2048 -keyout ca.key -out ca.crt
+
+Common name - rootca.au.team
+
+openssl genrsa -out game.key 2048
+ 
+openssl req  -key game.key -new -out game.csr
+
+Comminname - game .au.team
+
+
+ls
+
+cat <<EOF > files/www.ext
+authorityKeyIdentifier=keyid,issuer
+basicConstraints=CA:FALSE
+subjectAltName=@alt_names
+[alt_names]
+DNS.1=game .au.team
+IP.1=10.10.10.10
+EOF
+
+
+openssl x509 -req -CA ca.crt -CAkey ca.key -in game.csr -out game.crt -days 365 -CAcreateserial -extfile game.ext
+
+openssl x509 -noout -text -in game.crt | head -n20
+
+
+sudo cp ca.crt /etc/pki/ca-trust/source/anchors/
+sudo update-ca-trust
+
+cat game.key game.crt > game.pem
+
+
+Поправить файл haproxy.cfg - адреса!!!
+
+
+
+
 
